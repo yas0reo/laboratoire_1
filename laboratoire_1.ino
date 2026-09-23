@@ -1,41 +1,76 @@
 #include <Arduino.h>
+#include <Chrono.h>
 #include <Bounce2.h>
+ 
+#define BROCHE_DEL_TEMPO 8
+#define BROCHE_BOUTON_TEMPO 7
 
-#define BROCHE_BOUTON_TEMPO 6
-#define BROCHE_DEL_TEMPO 5
+#define BROCHE_DEL_BAS 6
+#define BROCHE_BOUTON_BAS 5
 
-#define BROCHE_BOUTON_BASCULE 8
-#define BROCHE_DEL_BASCULE 7
+Bounce2::Button BOUTON_TEMPO = Bounce2::Button();
+Bounce2::Button BOUTON_BAS = Bounce2::Button();
 
-Bounce2::Button boutonBascule = Bounce2::Button();
-bool etatDelBascule = LOW;
+bool etatDelTempo = LOW;
+bool etatDelBas = LOW;
 
 void setup()
 {
-    // la DEL reste allumée tant que le bouton est maintenu
-    pinMode(BROCHE_BOUTON_TEMPO, INPUT_PULLUP);
+    // Configuration de la DEL
     pinMode(BROCHE_DEL_TEMPO, OUTPUT);
-    digitalWrite(BROCHE_DEL_TEMPO, LOW);
+    digitalWrite(BROCHE_DEL_TEMPO, etatDelTempo);
 
-    // un appui allume, un second appui éteint
-    pinMode(BROCHE_DEL_BASCULE, OUTPUT);
-    digitalWrite(BROCHE_DEL_BASCULE, etatDelBascule);
+    // Configuration de la DEL
+    pinMode(BROCHE_DEL_BAS, OUTPUT);
+    digitalWrite(BROCHE_DEL_BAS, etatDelBas);
+ 
 
-    boutonBascule.attach(BROCHE_BOUTON_BASCULE, INPUT_PULLUP);
-    boutonBascule.setPressedState(LOW);
+    // Configuration du bouton
+    BOUTON_TEMPO.attach(BROCHE_BOUTON_TEMPO, INPUT_PULLUP);
+    BOUTON_TEMPO.setPressedState(LOW);
+ 
+    // Configuration du bouton
+    BOUTON_BAS.attach(BROCHE_BOUTON_BAS, INPUT_PULLUP);
+    BOUTON_BAS.setPressedState(LOW);
 }
 
 void loop()
 {
-    // Gestion du bouton momentané
-    bool boutonEnfonce = (digitalRead(BROCHE_BOUTON_TEMPO) == LOW);
-    digitalWrite(BROCHE_DEL_TEMPO, boutonEnfonce ? HIGH : LOW);
+    BOUTON_TEMPO.update();
+    BOUTON_BAS.update();
 
-     //Gestion du bouton bascule
-    boutonBascule.update();
-    if (boutonBascule.pressed())
+    if (BOUTON_TEMPO.isPressed())
     {
-        etatDelBascule = !etatDelBascule;
-        digitalWrite(BROCHE_DEL_BASCULE, etatDelBascule);
+        digitalWrite(BROCHE_DEL_TEMPO, HIGH); //lumière est allumée
+        Serial.print("TEMPO"); // Descripteur
+        Serial.print(" "); // Espace
+        Serial.print(1); // Valeur
+        Serial.println(); // Saut de ligne
     }
+    else
+    {
+        digitalWrite(BROCHE_DEL_TEMPO, etatDelTempo); //lumière est éteinte
+    }
+ 
+    if (BOUTON_BAS.isPressed())
+    {
+        digitalWrite(BROCHE_DEL_BAS, HIGH); //lumière est allumée
+        Serial.print("BAS"); // Descripteur
+        Serial.print(" "); // Espace
+        Serial.print(2); // Valeur
+        Serial.println(); // Saut de ligne
+        if ( etatDelBas == 0 ) {
+            etatDelBas = 1;
+        } else {
+            etatDelBas = 0;    
+        }
+    }
+    else
+    {
+        digitalWrite(BROCHE_DEL_BAS, etatDelBas); //lumière est éteinte
+    }
+    
 }
+ 
+ 
+ 
